@@ -924,10 +924,20 @@ public:
 
     void prepare (const ProcessSpec& spec)
     {
-        smoother.reset (spec.sampleRate, 0.05);
+        sampleRate = spec.sampleRate;
+        smoother.reset (spec.sampleRate, rampLengthInSeconds);
         smootherBuffer.setSize (1, static_cast<int> (spec.maximumBlockSize));
         mixBuffer.setSize (static_cast<int> (spec.numChannels), static_cast<int> (spec.maximumBlockSize));
         reset();
+    }
+
+    void setCrossfadeDuration(const double rampLengthInSecondsIn)
+    {
+        rampLengthInSeconds = rampLengthInSecondsIn;
+        if( sampleRate > 0 )
+        {
+            smoother.reset (sampleRate, rampLengthInSeconds);
+        }
     }
 
     template <typename ProcessCurrent, typename ProcessPrevious, typename NotifyDone>
@@ -989,6 +999,8 @@ private:
     LinearSmoothedValue<float> smoother;
     AudioBuffer<float> smootherBuffer;
     AudioBuffer<float> mixBuffer;
+    double rampLengthInSeconds = 0.05;
+    double sampleRate = 0.0;
 };
 
 using OptionalQueue = OptionalScopedPointer<ConvolutionMessageQueue>;
@@ -1077,6 +1089,11 @@ public:
                               Normalise normalise)
     {
         engineQueue->loadImpulseResponse (fileImpulseResponse, stereo, trim, size, normalise);
+    }
+
+    void setCrossfadeDuration(const double rampLengthInSeconds)
+    {
+        mixer.setCrossfadeDuration(rampLengthInSeconds);
     }
 
 private:
@@ -1266,6 +1283,11 @@ void Convolution::processSamples (const AudioBlock<const float>& input,
     {
         pimpl->processSamples (in, out);
     });
+}
+
+void Convolution::setCrossfadeDuration(const double rampLengthInSeconds)
+{
+    pimpl->setCrossfadeDuration(rampLengthInSeconds);
 }
 
 int Convolution::getCurrentIRSize() const { return pimpl->getCurrentIRSize(); }

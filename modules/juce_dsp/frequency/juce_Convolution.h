@@ -172,6 +172,9 @@ public:
     /** Resets the processing pipeline ready to start a new stream of data. */
     void reset() noexcept;
 
+    /** Set duration of crossfade between loaded impulse responses. */
+    void setCrossfadeDuration(const double rampLengthInSeconds);
+
     /** Performs the filter operation on the given set of samples with optional
         stereo processing.
     */
