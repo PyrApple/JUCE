@@ -958,10 +958,6 @@ public:
     void setCrossfadeDuration(const double rampLengthInSecondsIn)
     {
         rampLengthInSeconds = rampLengthInSecondsIn;
-        if( sampleRate > 0 )
-        {
-            smoother.reset (sampleRate, rampLengthInSeconds);
-        }
     }
 
     template <typename ProcessCurrent, typename ProcessPrevious, typename NotifyDone>
@@ -1015,8 +1011,9 @@ public:
 
     void beginTransition()
     {
-        smoother.setCurrentAndTargetValue (1.0f);
-        smoother.setTargetValue (0.0f);
+        smoother.reset(sampleRate, rampLengthInSeconds);
+        smoother.setCurrentAndTargetValue(1.0f);
+        smoother.setTargetValue(0.0f);
     }
 
 private:
